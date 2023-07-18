@@ -1,3 +1,6 @@
+https://godatadriven.com/blog/a-practical-guide-to-setuptools-and-pyproject-toml/
+https://pip.pypa.io/en/stable/reference/build-system/pyproject-toml/
+
 # Softweb Solutions Inc
 # IOT Connect SDK : Software Development Kit 1.0
 
