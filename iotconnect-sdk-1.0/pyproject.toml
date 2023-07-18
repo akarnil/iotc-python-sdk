@@ -1,0 +1,3 @@
+[build-system]
+requires = ["setuptools", "ntplib", "paho-mqtt", "jsonlib-python3"]
+build-backend = "setuptools.build_meta"
