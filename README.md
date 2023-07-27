@@ -1,3 +1,14 @@
+sudo pip install -e .
+
+
+
+
+
+
+
+
+
+
 Author: Softweb Solutions An Avnet Company
 Brief: IOT Connect SDK: Software Development Kit 1.0
 Modify: 02-January-2023
