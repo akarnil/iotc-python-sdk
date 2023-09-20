@@ -44,7 +44,7 @@ class offlineclient:
             #return
             time.sleep(1)
             count=0
-            freqency=10
+            frequency=10
             total_count=0
             #log_path = os.path.join(sys.path[0], "logs")
             files = self.get_log_files()
@@ -71,7 +71,7 @@ class offlineclient:
                                 count=count+1
                                 total_count=total_count+1
                             if self.is_timer_start:
-                                self.start_timer(freqency)
+                                self.start_timer(frequency)
                             if (self.data_rate == True) and (count > 0):
                                 print("\nPublish offline data : " + str(count)+" "+ datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.000"))
                                 self.write_file(f,dummy[count:])
@@ -81,7 +81,7 @@ class offlineclient:
                                 self.is_timer_start=True
                                 files = self.get_log_files()
                                 files.sort()
-                                #time.sleep(freqency)
+                                #time.sleep(frequency)
                     if len(rData) > 0:
                         isAction = 1
                     if isAction == 0: #DELETE
@@ -110,42 +110,42 @@ class offlineclient:
         try:
             data_path = None
             log_path = os.path.join(sys.path[0], "logs")
-            path_staus=os.path.exists(log_path)
-            if path_staus:
-                for sub_folder in ["offline",self._cpid_uniqid]:
+            path_status=os.path.exists(log_path)
+            if path_status:
+                for sub_folder in ["offline",self._cpid_uniqueid]:
                     log_path = os.path.join(log_path,sub_folder)
-                    path_staus=os.path.exists(log_path)
-                    if path_staus:
+                    path_status=os.path.exists(log_path)
+                    if path_status:
                         files = os.listdir(log_path)
                         for f in files:
-                            if f != self._cpid_uniqid:
+                            if f != self._cpid_uniqueid:
                                 if os.path.isdir(log_path+"\\"+f):
                                     shutil.rmtree(log_path+"\\"+f)
                     else:
                         os.mkdir(log_path)
             else:
                 os.mkdir(log_path)
-                for sub_folder in ["offline",self._cpid_uniqid]:
+                for sub_folder in ["offline",self._cpid_uniqueid]:
                     log_path = os.path.join(log_path,sub_folder)
                     os.mkdir(log_path)
             files = os.listdir(log_path)
             if len(files) > 0:
                 for f in files:
                     if f.startswith("active"):
-                        fpath = os.path.join(sys.path[0] + "/logs/offline/"+self._cpid_uniqid, f)
+                        fpath = os.path.join(sys.path[0] + "/logs/offline/"+self._cpid_uniqueid, f)
                         fsize = round(self.convert_unit(float(os.stat(fpath).st_size), self._file_unit), 2)
                         if fsize < self._file_size or self._file_size == 1:
                             data_path = fpath
                         else:
-                            os.rename(fpath, os.path.join(sys.path[0] + "/logs/offline/"+self._cpid_uniqid, f.replace("active_", "")))
+                            os.rename(fpath, os.path.join(sys.path[0] + "/logs/offline/"+self._cpid_uniqueid, f.replace("active_", "")))
             if data_path == None:
-                data_path = os.path.join(sys.path[0], "logs/offline/"+self._cpid_uniqid+"/active_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".txt")
+                data_path = os.path.join(sys.path[0], "logs/offline/"+self._cpid_uniqueid+"/active_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".txt")
             #Remove first file if size limit exceed
             self.remove_first_file()
             return data_path
         except Exception as ex:
             print(ex)
-            return os.path.join(sys.path[0], "logs/offline/"+self._cpid_uniqid+"/active_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".txt")
+            return os.path.join(sys.path[0], "logs/offline/"+self._cpid_uniqueid+"/active_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".txt")
 
     def new_active_file(self, file_path):
         try:
@@ -160,37 +160,37 @@ class offlineclient:
                     os.rename(file_path, file_path.replace("active_", ""))
             if data_path == None:
                 is_new = True
-                data_path = os.path.join(sys.path[0], "logs/offline/"+self._cpid_uniqid+"/active_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".txt")
+                data_path = os.path.join(sys.path[0], "logs/offline/"+self._cpid_uniqueid+"/active_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".txt")
             #Remove first file if size limit exceed
             if is_new:
                 self.remove_first_file()
             return data_path
         except Exception as ex:
             print(ex)
-            return os.path.join(sys.path[0], "logs/offline/"+self._cpid_uniqid+"/active_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".txt")
+            return os.path.join(sys.path[0], "logs/offline/"+self._cpid_uniqueid+"/active_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".txt")
 
     def get_log_files(self):
         logs = []
         try:
             log_path = os.path.join(sys.path[0], "logs")
-            path_staus=os.path.exists(log_path)
-            if path_staus:
-                for sub_folder in ["offline",self._cpid_uniqid]:
+            path_status=os.path.exists(log_path)
+            if path_status:
+                for sub_folder in ["offline",self._cpid_uniqueid]:
                     log_path = os.path.join(log_path,sub_folder)
-                    path_staus=os.path.exists(log_path)
-                    if path_staus:
+                    path_status=os.path.exists(log_path)
+                    if path_status:
                         pass
                     else:
                         os.mkdir(log_path)
             else:
                 os.mkdir(log_path)
-                for sub_folder in ["offline",self._cpid_uniqid]:
+                for sub_folder in ["offline",self._cpid_uniqueid]:
                     log_path = os.path.join(log_path,sub_folder)
                     os.mkdir(log_path)
             files = os.listdir(log_path)
             if len(files) > 0:
                 for f in files:
-                    fpath = os.path.join(sys.path[0] + "/logs/offline/"+self._cpid_uniqid, f)
+                    fpath = os.path.join(sys.path[0] + "/logs/offline/"+self._cpid_uniqueid, f)
                     if f.startswith("active"):
                         os.rename(fpath, fpath.replace("active_", ""))
                         fpath = fpath.replace("active_", "")
@@ -228,11 +228,11 @@ class offlineclient:
             os.remove(file_path)
             print("\nLog file deleted successfully")
         except:
-            print("\nErrro while delete file")
+            print("\nError while delete file")
 
     def clear_all_files(self):
         try:
-            log_path = os.path.join(sys.path[0], "logs/offline/"+self._cpid_uniqid)
+            log_path = os.path.join(sys.path[0], "logs/offline/"+self._cpid_uniqueid)
             filelist = [ f for f in os.listdir(log_path) if f ]
             for f in filelist:
                 if os.path.isfile(os.path.join(log_path, f)):
@@ -252,13 +252,13 @@ class offlineclient:
                     dfile.write(wData)
                 isDone = True
             except:
-                print("\nErrro while write file")
+                print("\nError while write file")
             if isDone:
                 print("\nLog file write successfully")
             else:
                 self.delete_file(file_path)
         except:
-            print("\nErrro while write file")
+            print("\nError while write file")
 
     def convert_unit(self, size_in_bytes, unit = 0):
         try:
@@ -286,13 +286,13 @@ class offlineclient:
 
     def remove_first_file(self):
         try:
-            log_path = os.path.join(sys.path[0], "logs/offline/"+self._cpid_uniqid)
+            log_path = os.path.join(sys.path[0], "logs/offline/"+self._cpid_uniqueid)
             files = os.listdir(log_path)
             if len(files) >= self.file_count:
                 v=[]
                 for i in range(0,len(files)):
                     v.append(int(files[i].replace('-','').replace('.txt','')))
-                fpath = os.path.join(sys.path[0] + "/logs/offline/"+self._cpid_uniqid, files[v.index(min(v))])
+                fpath = os.path.join(sys.path[0] + "/logs/offline/"+self._cpid_uniqueid, files[v.index(min(v))])
                 os.remove(fpath)
         except:
             pass
@@ -303,8 +303,8 @@ class offlineclient:
         except:
             return False
 
-    def __init__(self,cpid_uniqid,sdk_config, sendBackToClient):
-        self._cpid_uniqid=cpid_uniqid
+    def __init__(self,cpid_uniqueid,sdk_config, sendBackToClient):
+        self._cpid_uniqueid=cpid_uniqueid
         self._sdk_config = sdk_config
         self.max_size = 0 #MB
         self.file_count = 1
