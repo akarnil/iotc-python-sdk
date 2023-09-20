@@ -108,7 +108,7 @@ class IoTConnectSDK:
     _listener_module_callback = None
     _listener_devicechange_callback = None
     _listener_rulechange_callback = None
-    _listener_creatchild_callback=None
+    _listener_createchild_callback=None
     _listener_twin_callback = None
     _data_json = None
     _client = None
@@ -337,11 +337,11 @@ class IoTConnectSDK:
                     if msg['ec'] == 0 and msg["ct"] == 205:
                         self._data_json["ota"] = msg["ota"]
                     if msg["ct"] == 221:
-                        if self._listener_creatchild_callback:
+                        if self._listener_createchild_callback:
                             if msg["ec"] == 0:
-                                self._listener_creatchild_callback({"status":True,"message":self.__child_error_log(msg["ec"])})
+                                self._listener_createchild_callback({"status":True,"message":self.__child_error_log(msg["ec"])})
                             else:
-                                self._listener_creatchild_callback({"status":False,"message":self.__child_error_log(msg["ec"])})
+                                self._listener_createchild_callback({"status":False,"message":self.__child_error_log(msg["ec"])})
                     if msg["ct"] == 222:
                         if self._listener_deletechild_callback:
                             if msg["ec"] == 0:
@@ -1112,7 +1112,7 @@ class IoTConnectSDK:
             template["id"]=deviceId
             template["tg"]=deviceTag
             if callback:
-                self._listener_creatchild_callback=callback
+                self._listener_createchild_callback=callback
         except:
             self.write_debuglog('[ERR_GD01] '+ self._time +'['+ str(self._sId)+'_'+ str(self._uniqueId) + "] Create child Device Error",1)
             raise(IoTConnectSDKException("04", "createChildDevice"))
