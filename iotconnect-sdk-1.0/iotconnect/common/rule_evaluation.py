@@ -89,8 +89,8 @@ class rule_evaluation:
                         sdata["sg"] = rule["es"]
                         sdata["id"] = rule["id"]
                         sdata["dt"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
-                        if self.listner_callback != None:
-                            self.listner_callback(sdata)
+                        if self.listener_callback != None:
+                            self.listener_callback(sdata)
                 else:
                     # print("\n---- Rule Not Matched ---")
                     pass
@@ -107,9 +107,9 @@ class rule_evaluation:
     def _timestamp(self):
         return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
-    def __init__(self, listner, command_sender):
-        if listner != None:
-            self.listner_callback = listner
+    def __init__(self, listener, command_sender):
+        if listener != None:
+            self.listener_callback = listener
 
         if command_sender != None:
             self._command_sender = command_sender

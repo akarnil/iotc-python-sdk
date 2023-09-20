@@ -546,8 +546,8 @@ class data_evaluation:
         if len(final) > 0:
             #edgeData.append(final)
             attr_data = { "tg": tg, "d": final}
-            if self.listner_callback:
-                self.listner_callback(attr_data)
+            if self.listener_callback:
+                self.listener_callback(attr_data)
 
     def reset_get_rule_data(self):
         for i in range(0,len(self._attribute["d"])):
@@ -577,8 +577,8 @@ class data_evaluation:
 
     def destroyed(self):
         try:
-            if self.listner_callback != None:
-                self.listner_callback = None
+            if self.listener_callback != None:
+                self.listener_callback = None
 
             if self._data != None:
                 del(self._data)
@@ -615,14 +615,14 @@ class data_evaluation:
     def _timestamp(self):
         return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
-    def __init__(self, isEdge, attribute, listner):
+    def __init__(self, isEdge, attribute, listener):
         self._data = {}
         self._isEdge = isEdge
         self._attribute = json.loads(json.dumps(attribute))
         self._timer = []
 
-        if listner != None:
-            self.listner_callback = listner
+        if listener != None:
+            self.listener_callback = listener
 
         name = self._attribute["p"]
         for data in self._attribute["d"]:
