@@ -44,7 +44,7 @@ MSGTYPE = {
     "OTA" : 6,
     "FIRMWARE": 11
 }
-ErorCode = {
+ErrorCode = {
     "OK": 0,
     "DEV_NOT_REG": 1,
     "AUTO_REG": 2,
@@ -559,10 +559,10 @@ class IoTConnectSDK:
                         self._offlineflag = False
                     else:
                         raise(IoTConnectSDKException("03", response["message"]))
-                    if response["ec"] != ErorCode["OK"]:
+                    if response["ec"] != ErrorCode["OK"]:
                         isReChecking = True
                         self._time_s=60
-                    if response["ec"] == ErorCode["DEV_NOT_FOUND"] or response["ec"] == ErorCode["CPID_NOT_FOUND"] :
+                    if response["ec"] == ErrorCode["DEV_NOT_FOUND"] or response["ec"] == ErrorCode["CPID_NOT_FOUND"] :
                         self.write_debuglog('[ERR_IN10] '+ self._time +'['+ str(self._sId)+'_'+ str(self._uniqueId) + "] Device Information not found",1)
             else:
                 if option == "ATT":
