@@ -119,11 +119,11 @@ To receive the command from cloud-to-device
 			#Device comand Received 
 			if "id" in data:
 					if "ack" in data and data["ack"]:
-						Sdk.sendAckCmd(data["ack"],7,"sucessfull",data["id"])  #fail=4,executed= 5,sucess=7,6=executedack 
+						Sdk.sendAckCmd(data["ack"],7,"successful",data["id"])  #fail=4,executed= 5,sucess=7,6=executedack 
 						#To send ACK for gateway type device
 				else:
 					if "ack" in data and data["ack"]:
-						Sdk.sendAckCmd(data["ack"],7,"sucessfull") #fail=4,executed= 5,sucess=7,6=executedack	
+						Sdk.sendAckCmd(data["ack"],7,"successful") #fail=4,executed= 5,sucess=7,6=executedack	
 						#To send ACK for non-gateway type device
 ```
 
@@ -137,10 +137,10 @@ To receive the OTA command from cloud-to-device
 						if "tg" in url_list:
 							for i in device_list:
 								if "tg" in i and (i["tg"] == url_list["tg"]):
-									Sdk.sendOTAAckCmd(data["ack"],0,"sucessfull",i["id"]) #Success=0, Failed = 1, Executed/DownloadingInProgress=2, Executed/DownloadDone=3, Failed/DownloadFailed=4
+									Sdk.sendOTAAckCmd(data["ack"],0,"successful",i["id"]) #Success=0, Failed = 1, Executed/DownloadingInProgress=2, Executed/DownloadDone=3, Failed/DownloadFailed=4
 									#To send ACK for gateway type device
 						else:
-							Sdk.sendOTAAckCmd(data["ack"],0,"sucessfull") #Success=0, Failed = 1, Executed/DownloadingInProgress=2, Executed/DownloadDone=3, Failed/DownloadFailed=4
+							Sdk.sendOTAAckCmd(data["ack"],0,"successful") #Success=0, Failed = 1, Executed/DownloadingInProgress=2, Executed/DownloadDone=3, Failed/DownloadFailed=4
 							#To send ACK for non-gateway type device
 ```
 

@@ -984,7 +984,7 @@ class IoTConnectSDK:
                 elif msgType == "CMD_ACK":
                     #print (">>command acknowledge ack", data["d"]["ack"])
                     print("\nPublish command acknowledge data successfully... %s" % self._time)
-                    self.write_debuglog('[INFO_CM10] '+'['+ str(self._sId)+'_'+str(self._uniqueId)+"] Command Acknowledgement sucessfull: "+self._time ,0)
+                    self.write_debuglog('[INFO_CM10] '+'['+ str(self._sId)+'_'+str(self._uniqueId)+"] Command Acknowledgement successful: "+self._time ,0)
                 else:
                     print("\nPublish data successfully... %s" % self._time,data,msgType)
 
