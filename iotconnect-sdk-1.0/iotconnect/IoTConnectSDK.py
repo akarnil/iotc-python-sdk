@@ -104,7 +104,7 @@ class IoTConnectSDK:
     _listener_callback = None
     _listener_ota_callback = None
     _listener_device_callback = None
-    _listener_attchng_callback = None
+    _listener_attaching_callback = None
     _listener_module_callback = None
     _listener_devicechng_callback = None
     _listener_rulechng_callback = None
@@ -272,7 +272,7 @@ class IoTConnectSDK:
 
     def onAttrChangeCommand(self,callback):
         if callback:
-            self._listener_attchng_callback = callback
+            self._listener_attaching_callback = callback
 
     def onDeviceChangeCommand(self,callback):
         if callback:
@@ -380,8 +380,8 @@ class IoTConnectSDK:
                 return
             _tProcess = None
             if msg["ct"] == CMDTYPE["U_ATTRIBUTE"]:
-                if self._listener_attchng_callback:
-                    self._listener_attchng_callback(msg)
+                if self._listener_attaching_callback:
+                    self._listener_attaching_callback(msg)
                 print(str(CMDTYPE["U_ATTRIBUTE"])+" U_ATTRIBUTE command received...")
                 print(msg)
                 _tProcess = threading.Thread(target = self.reset_process_sync, args = ["ATT"])
