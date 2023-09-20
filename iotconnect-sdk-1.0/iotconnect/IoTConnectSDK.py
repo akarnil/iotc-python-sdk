@@ -595,7 +595,7 @@ class IoTConnectSDK:
                     if self._pf == "aws":
                         data = { "_connectionStatus": "true" }
                         self._client.SendTwinData(data)
-                        print("\nPublish connection status shadow sucessfully... %s" % self._time)
+                        print("\nPublish connection status shadow successfully... %s" % self._time)
 
                     if self.has_key(self._data_json,"has") and self._data_json["has"]["attr"]:
                         # self._hello_handshake({"mt":201,"sid":self._sId})
@@ -914,7 +914,7 @@ class IoTConnectSDK:
                         if self._client:
                             _Online = self._client.SendTwinData(_data)
                         if _Online:
-                            print("\nupdate twin data sucessfully... %s" % self._time)
+                            print("\nupdate twin data successfully... %s" % self._time)
         except Exception as ex:
             print(ex)
 
@@ -974,25 +974,25 @@ class IoTConnectSDK:
 
             if _Online:
                 if msgType == "RPTEDGE":
-                    print("\nPublish edge data sucessfully... %s" % self._time)
+                    print("\nPublish edge data successfully... %s" % self._time)
                 elif msgType == "RMEdge":
-                    print("\nPublish rule matched data sucessfully... %s" % self._time)
+                    print("\nPublish rule matched data successfully... %s" % self._time)
                 elif msgType == "CMD":
-                    print("\nPublish Command data sucessfully... %s" % self._time)
+                    print("\nPublish Command data successfully... %s" % self._time)
                 elif msgType == "FW":
-                    print("\nPublish Firmware data sucessfully... %s" % self._time)
+                    print("\nPublish Firmware data successfully... %s" % self._time)
                 elif msgType == "CMD_ACK":
                     #print (">>command acknowledge ack", data["d"]["ack"])
-                    print("\nPublish command acknowledge data sucessfully... %s" % self._time)
+                    print("\nPublish command acknowledge data successfully... %s" % self._time)
                     self.write_debuglog('[INFO_CM10] '+'['+ str(self._sId)+'_'+str(self._uniqueId)+"] Command Acknowledgement sucessfull: "+self._time ,0)
                 else:
-                    print("\nPublish data sucessfully... %s" % self._time,data,msgType)
+                    print("\nPublish data successfully... %s" % self._time,data,msgType)
 
             if _Online == False:
                 if self._offlineClient:
                     if self._offlineClient.Send(data):
                         self.write_debuglog('[INFO_OS02] '+'['+ str(self._sId)+'_'+str(self._uniqueId)+"] Offline data saved: "+self._time,0)
-                        print("\nStoring offline sucessfully... %s" % self._time)
+                        print("\nStoring offline successfully... %s" % self._time)
                     else:
                         self.write_debuglog('[ERR_OS03] '+ self._time +'['+ str(self._sId)+'_'+ str(self._uniqueId) + "] Unable to read or write file",1)
                         print("\nYou Unable to store offline data.")
