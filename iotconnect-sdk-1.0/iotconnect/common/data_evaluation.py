@@ -6,7 +6,7 @@ import json
 from iotconnect.common.infinite_timer import infinite_timer
 from iotconnect.IoTConnectSDKException import IoTConnectSDKException
 
-aggrigate_type = [
+aggregate_type = [
     { "name": "min", "value": 1 },
     { "name": "max", "value": 2 },
     { "name": "sum", "value": 4 },
@@ -509,7 +509,7 @@ class data_evaluation:
 
         final = []
         #final.append(int(agg_type))
-        for atype in aggrigate_type:
+        for atype in aggregate_type:
             value = atype["value"]
             name = atype["name"]
             if value:
