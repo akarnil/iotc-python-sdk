@@ -106,8 +106,8 @@ class IoTConnectSDK:
     _listener_device_callback = None
     _listener_attaching_callback = None
     _listener_module_callback = None
-    _listener_devicechng_callback = None
-    _listener_rulechng_callback = None
+    _listener_devicechange_callback = None
+    _listener_rulechange_callback = None
     _listener_creatchild_callback=None
     _listener_twin_callback = None
     _data_json = None
@@ -276,11 +276,11 @@ class IoTConnectSDK:
 
     def onDeviceChangeCommand(self,callback):
         if callback:
-            self._listener_devicechng_callback=callback
+            self._listener_devicechange_callback=callback
 
     def onRuleChangeCommand(self,callback):
         if callback:
-            self._listener_rulechng_callback = callback
+            self._listener_rulechange_callback = callback
 
     def heartbeat_stop(self):
         if self._heartbeat_timer:
@@ -332,8 +332,8 @@ class IoTConnectSDK:
                         self._data_json['d'].append({'tg': self._data_json['meta']['gtw']['tg'],'id': self._uniqueId})
                         for i in msg["d"]:
                                 self._data_json['d'].append(i)
-                        if self._listener_devicechng_callback:
-                            self._listener_devicechng_callback(msg)
+                        if self._listener_devicechange_callback:
+                            self._listener_devicechange_callback(msg)
                     if msg['ec'] == 0 and msg["ct"] == 205:
                         self._data_json["ota"] = msg["ota"]
                     if msg["ct"] == 221:
@@ -403,8 +403,8 @@ class IoTConnectSDK:
                 print(msg)
                 _tProcess = threading.Thread(target = self.reset_process_sync, args = ["DEVICE"])
             elif msg["ct"] == CMDTYPE["U_RULE"]:
-                if self._listener_rulechng_callback:
-                    self._listener_rulechng_callback(msg)
+                if self._listener_rulechange_callback:
+                    self._listener_rulechange_callback(msg)
                 print(str(CMDTYPE["U_RULE"])+" U_RULE command received...")
                 print(msg)
                 _tProcess = threading.Thread(target = self.reset_process_sync, args = ["RULE"])
