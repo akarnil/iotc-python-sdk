@@ -535,7 +535,7 @@ class IoTConnectSDK:
         except Exception as ex:
             raise(ex)
 
-    def _hello_handsake(self,data):
+    def _hello_handshake(self,data):
         if self._client:
             self._client.Send(data,"Di")
 
@@ -566,13 +566,13 @@ class IoTConnectSDK:
                         self.write_debuglog('[ERR_IN10] '+ self._time +'['+ str(self._sId)+'_'+ str(self._uniqueId) + "] Device Information not found",1)
             else:
                 if option == "ATT":
-                    self._hello_handsake({"mt":201,"sid":self._sId})
+                    self._hello_handshake({"mt":201,"sid":self._sId})
                 elif option == "SETTING":
-                    self._hello_handsake({"mt":202,"sid":self._sId})
+                    self._hello_handshake({"mt":202,"sid":self._sId})
                 elif option == "DEVICE":
-                    self._hello_handsake({"mt":204,"sid":self._sId})
+                    self._hello_handshake({"mt":204,"sid":self._sId})
                 elif option == "RULE":
-                    self._hello_handsake({"mt":203,"sid":self._sId})
+                    self._hello_handshake({"mt":203,"sid":self._sId})
                 else:
                     pass
             if isReChecking:
@@ -598,19 +598,19 @@ class IoTConnectSDK:
                         print("\nPublish connection status shadow sucessfully... %s" % self._time)
 
                     if self.has_key(self._data_json,"has") and self._data_json["has"]["attr"]:
-                        # self._hello_handsake({"mt":201,"sid":self._sId})
-                        self._hello_handsake({"mt":201})
+                        # self._hello_handshake({"mt":201,"sid":self._sId})
+                        self._hello_handshake({"mt":201})
                     if self.has_key(self._data_json,"has") and self._data_json["has"]["set"]:
-                        self._hello_handsake({"mt":202,"sid":self._sId})
+                        self._hello_handshake({"mt":202,"sid":self._sId})
                     if self.has_key(self._data_json,"has") and self._data_json["has"]["r"]:
-                        self._hello_handsake({"mt":203 ,"sid":self._sId})
+                        self._hello_handshake({"mt":203 ,"sid":self._sId})
                     if self.has_key(self._data_json,"has") and self._data_json["has"]["d"]:
-                        self._hello_handsake({"mt":204,"sid":self._sId})
+                        self._hello_handshake({"mt":204,"sid":self._sId})
                     else:
                         self._data_json['d']=[{'tg': '','id': self._uniqueId}]
 
                     if self.has_key(self._data_json,"has") and self._data_json["has"]["ota"]:
-                        self._hello_handsake({"mt":205,"sid":self._sId})
+                        self._hello_handshake({"mt":205,"sid":self._sId})
                     if "df" in self._data_json['meta'] and self._data_json['meta']["df"]:
                         self._data_frequency=self._data_json['meta']["df"]
 
@@ -1091,8 +1091,8 @@ class IoTConnectSDK:
         try:
             if callback:
                 self._getattribute_callback = callback
-            # self._hello_handsake({"mt":201,"sid":self._sId})
-            self._hello_handsake({"mt":201})
+            # self._hello_handshake({"mt":201,"sid":self._sId})
+            self._hello_handshake({"mt":201})
         except Exception as ex:
             self.write_debuglog('[ERR_GA01] '+ self._time +'['+ str(self._sId)+'_'+ str(self._uniqueId) + "] Get Attributes Error",1)
             return None
