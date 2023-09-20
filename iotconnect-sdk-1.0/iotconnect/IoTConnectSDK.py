@@ -318,7 +318,7 @@ class IoTConnectSDK:
                                 attr["evaluation"] = data_evaluation(self.isEdge, attr, self.send_edge_data)
                             self._is_process_started = True
                             self._offlineflag=False
-                            print("..........Atrributes Get Successfully...........")
+                            print("..........Attributes Get Successfully...........")
                         if self._getattribute_callback:
                             self._getattribute_callback(msg["att"])
                             self._getattribute_callback = None
@@ -345,7 +345,7 @@ class IoTConnectSDK:
                     if msg["ct"] == 222:
                         if self._listener_deletechild_callback:
                             if msg["ec"] == 0:
-                                self._listener_deletechild_callback({"status":True,"message":"sucessfuly delete child device"})
+                                self._listener_deletechild_callback({"status":True,"message":"successfully delete child device"})
                                 for i in range(0,len(self._data_json["d"])):
                                     if self._data_json["d"][i]["ename"] == self.deletechild:
                                         self._data_json["d"].pop(i)
@@ -409,7 +409,7 @@ class IoTConnectSDK:
                 print(msg)
                 _tProcess = threading.Thread(target = self.reset_process_sync, args = ["RULE"])
             elif msg["ct"] == CMDTYPE["RESETPWD"]:
-                #try to debuge
+                #try to debug
                 print(str(CMDTYPE["RESETPWD"])+" RESETPWD command received...")
                 print(msg)
                 _tProcess = threading.Thread(target = self.reset_process_sync, args = ["protocol"])
@@ -500,9 +500,9 @@ class IoTConnectSDK:
 
     def init_protocol(self):
         try:
-            protocol_cofig = self.protocol
-            name = protocol_cofig["n"]
-            protocol_cofig["pf"] = self._pf
+            protocol_config = self.protocol
+            name = protocol_config["n"]
+            protocol_config["pf"] = self._pf
             auth_type = self._data_json["meta"]['at']
             if auth_type == 2 or auth_type == 3:
                 cert=self._config["certificate"]
@@ -519,7 +519,7 @@ class IoTConnectSDK:
 
             if auth_type == 5:
                 if ("devicePrimaryKey" in self._property) and self._property["devicePrimaryKey"]:
-                    protocol_cofig["pwd"]=self.generate_sas_token(protocol_cofig["h"],self._property["devicePrimaryKey"])
+                    protocol_config["pwd"]=self.generate_sas_token(protocol_config["h"],self._property["devicePrimaryKey"])
                 else:
                     raise(IoTConnectSDKException("01", "devicePrimaryKey"))
 
@@ -527,9 +527,9 @@ class IoTConnectSDK:
                 self._client = None
 
             if name == "mqtt":
-                self._client = mqttclient(auth_type, protocol_cofig, self._config, self.onMessage,self.onDirectMethodMessage, self.onTwinMessage)
+                self._client = mqttclient(auth_type, protocol_config, self._config, self.onMessage,self.onDirectMethodMessage, self.onTwinMessage)
             elif name == "http" or name == "https":
-                self._client = httpclient(protocol_cofig, self._config)
+                self._client = httpclient(protocol_config, self._config)
             else:
                 self._client = None
         except Exception as ex:
@@ -1047,13 +1047,13 @@ class IoTConnectSDK:
         except Exception as ex:
             print(ex)
 
-    def event_call(self, name, taget, arg):
-        _thread = threading.Thread(target=getattr(self, taget), args=arg)
+    def event_call(self, name, target, arg):
+        _thread = threading.Thread(target=getattr(self, target), args=arg)
         #_thread.daemon = True
         _thread.setName(name)
         _thread.start()
 
-    def delete_chield(self,child_id,callback):
+    def delete_child(self,child_id,callback):
         try:
             if self._dispose == True:
                 self.write_debuglog('[ERR_GD03] '+ self._time +'['+ str(self._sId)+'_'+ str(self._uniqueId) + "] Request failed to delete the child device",1)
@@ -1061,7 +1061,7 @@ class IoTConnectSDK:
             if self._is_process_started == False:
                 return None
             if self._data_json["has"]["d"] != 1:
-                raise(IoTConnectSDKException("00", "delete child Device not posibale. it is not gatway device. "))
+                raise(IoTConnectSDKException("00", "delete child Device not possible. it is not gateway device. "))
             for device in self._data_json['d']:
                 if child_id == device["id"]:
                     self._listener_deletechild_callback=callback
@@ -1104,7 +1104,7 @@ class IoTConnectSDK:
 
             if self._data_json["has"]["d"] != 1:
                 self.write_debuglog('[ERR_GD04] '+ self._time +'['+ str(self._sId)+'_'+ str(self._uniqueId) + "] Child device create : It is not a Gateway device",1)
-                raise(IoTConnectSDKException("00", "create child Device not posibale it is not gatway device. "))
+                raise(IoTConnectSDKException("00", "create child Device not possible it is not gateway device. "))
             if (type(deviceId)) != str and (" " in deviceId):
                 raise(IoTConnectSDKException("00", "create child Device in deviceId space is not valid. "))
             template=self._child_template
@@ -1195,7 +1195,7 @@ class IoTConnectSDK:
             data["dt"] = self._timestamp
             return data
         except:
-            raise(IoTConnectSDKException("07", "telementry"))
+            raise(IoTConnectSDKException("07", "telemetry"))
 
     @property
     def _Ack_data_template(self):
@@ -1212,16 +1212,16 @@ class IoTConnectSDK:
             data["dt"] = self._timestamp
             return data
         except:
-            raise(IoTConnectSDKException("07", "telementry"))
+            raise(IoTConnectSDKException("07", "telemetry"))
     # @property
     def get_file(self):
         debug_path = os.path.join(sys.path[0], "logs")
-        path_staus=os.path.exists(debug_path)
-        if path_staus:
+        path_status=os.path.exists(debug_path)
+        if path_status:
             for sub_folder in ["debug"]:
                 debug_path = os.path.join(debug_path,sub_folder)
-                path_staus=os.path.exists(debug_path)
-                if path_staus:
+                path_status=os.path.exists(debug_path)
+                if path_status:
                     pass
                 else:
                     os.mkdir(debug_path)
