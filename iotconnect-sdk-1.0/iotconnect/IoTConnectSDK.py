@@ -101,15 +101,15 @@ class IoTConnectSDK:
     _cpId = None
     _sId =None
     _uniqueId = None
-    _listner_callback = None
-    _listner_ota_callback = None
-    _listner_device_callback = None
-    _listner_attchng_callback = None
-    _listner_module_callback = None
-    _listner_devicechng_callback = None
-    _listner_rulechng_callback = None
-    _listner_creatchild_callback=None
-    _listner_twin_callback = None
+    _listener_callback = None
+    _listener_ota_callback = None
+    _listener_device_callback = None
+    _listener_attchng_callback = None
+    _listener_module_callback = None
+    _listener_devicechng_callback = None
+    _listener_rulechng_callback = None
+    _listener_creatchild_callback=None
+    _listener_twin_callback = None
     _data_json = None
     _client = None
     _is_process_started = False
@@ -129,7 +129,7 @@ class IoTConnectSDK:
     _time_s=None
     _heartbeat_timer = None
     deletechild=None
-    _listner_deletechild_callback = None
+    _listener_deletechild_callback = None
     _validation = True
     _getattribute_callback = None
 
@@ -238,9 +238,9 @@ class IoTConnectSDK:
             self._config = None
             self._cpId = None
             self._uniqueId = None
-            self._listner_callback = None
-            self._listner_twin_callback = None
-            self._listner_direct_callback_list = None
+            self._listener_callback = None
+            self._listener_twin_callback = None
+            self._listener_direct_callback_list = None
             self._data_json = None
             self._client = None
             self._base_url = ""
@@ -256,31 +256,31 @@ class IoTConnectSDK:
 
     def onOTACommand(self,callback):
         if callback:
-            self._listner_ota_callback = callback
+            self._listener_ota_callback = callback
 
     def onModuleCommand(self,callback):
         if callback:
-            self._listner_module_callback = callback
+            self._listener_module_callback = callback
 
     def onDeviceCommand(self,callback):
         if callback:
-            self._listner_device_callback = callback
+            self._listener_device_callback = callback
 
     def onTwinChangeCommand(self,callback):
         if callback:
-            self._listner_twin_callback = callback
+            self._listener_twin_callback = callback
 
     def onAttrChangeCommand(self,callback):
         if callback:
-            self._listner_attchng_callback = callback
+            self._listener_attchng_callback = callback
 
     def onDeviceChangeCommand(self,callback):
         if callback:
-            self._listner_devicechng_callback=callback
+            self._listener_devicechng_callback=callback
 
     def onRuleChangeCommand(self,callback):
         if callback:
-            self._listner_rulechng_callback = callback
+            self._listener_rulechng_callback = callback
 
     def heartbeat_stop(self):
         if self._heartbeat_timer:
@@ -332,27 +332,27 @@ class IoTConnectSDK:
                         self._data_json['d'].append({'tg': self._data_json['meta']['gtw']['tg'],'id': self._uniqueId})
                         for i in msg["d"]:
                                 self._data_json['d'].append(i)
-                        if self._listner_devicechng_callback:
-                            self._listner_devicechng_callback(msg)
+                        if self._listener_devicechng_callback:
+                            self._listener_devicechng_callback(msg)
                     if msg['ec'] == 0 and msg["ct"] == 205:
                         self._data_json["ota"] = msg["ota"]
                     if msg["ct"] == 221:
-                        if self._listner_creatchild_callback:
+                        if self._listener_creatchild_callback:
                             if msg["ec"] == 0:
-                                self._listner_creatchild_callback({"status":True,"message":self.__child_error_log(msg["ec"])})
+                                self._listener_creatchild_callback({"status":True,"message":self.__child_error_log(msg["ec"])})
                             else:
-                                self._listner_creatchild_callback({"status":False,"message":self.__child_error_log(msg["ec"])})
+                                self._listener_creatchild_callback({"status":False,"message":self.__child_error_log(msg["ec"])})
                     if msg["ct"] == 222:
-                        if self._listner_deletechild_callback:
+                        if self._listener_deletechild_callback:
                             if msg["ec"] == 0:
-                                self._listner_deletechild_callback({"status":True,"message":"sucessfuly delete child device"})
+                                self._listener_deletechild_callback({"status":True,"message":"sucessfuly delete child device"})
                                 for i in range(0,len(self._data_json["d"])):
                                     if self._data_json["d"][i]["ename"] == self.deletechild:
                                         self._data_json["d"].pop(i)
                                         break
                             else:
-                                self._listner_deletechild_callback({"status":True,"message":"fail to delete child device"})
-                        self._listner_deletechild_callback=None
+                                self._listener_deletechild_callback({"status":True,"message":"fail to delete child device"})
+                        self._listener_deletechild_callback=None
                     return
                 else:
                     pass
@@ -366,9 +366,9 @@ class IoTConnectSDK:
                             if self._is_process_started:
                                 self.reconnect_device("reconnect")
 
-                        if self._listner_callback:
-                            # self._listner_callback(msg["data"])
-                            self._listner_callback(msg)
+                        if self._listener_callback:
+                            # self._listener_callback(msg["data"])
+                            self._listener_callback(msg)
                         self.write_debuglog('[INFO_CM09] '+ self._time +'['+ str(self._sId)+'_'+ str(self._uniqueId) + "] 0x116 sdk connection status: " + msg["command"],0)
                         return
 
@@ -380,8 +380,8 @@ class IoTConnectSDK:
                 return
             _tProcess = None
             if msg["ct"] == CMDTYPE["U_ATTRIBUTE"]:
-                if self._listner_attchng_callback:
-                    self._listner_attchng_callback(msg)
+                if self._listener_attchng_callback:
+                    self._listener_attchng_callback(msg)
                 print(str(CMDTYPE["U_ATTRIBUTE"])+" U_ATTRIBUTE command received...")
                 print(msg)
                 _tProcess = threading.Thread(target = self.reset_process_sync, args = ["ATT"])
@@ -403,8 +403,8 @@ class IoTConnectSDK:
                 print(msg)
                 _tProcess = threading.Thread(target = self.reset_process_sync, args = ["DEVICE"])
             elif msg["ct"] == CMDTYPE["U_RULE"]:
-                if self._listner_rulechng_callback:
-                    self._listner_rulechng_callback(msg)
+                if self._listener_rulechng_callback:
+                    self._listener_rulechng_callback(msg)
                 print(str(CMDTYPE["U_RULE"])+" U_RULE command received...")
                 print(msg)
                 _tProcess = threading.Thread(target = self.reset_process_sync, args = ["RULE"])
@@ -425,18 +425,18 @@ class IoTConnectSDK:
             elif msg["ct"] == CMDTYPE["DCOMM"]:
                 print(str(CMDTYPE["DCOMM"])+" DCOMM command received...")
                 print(msg)
-                if self._listner_device_callback != None:
-                    self._listner_device_callback(msg)
+                if self._listener_device_callback != None:
+                    self._listener_device_callback(msg)
             elif msg["ct"] == CMDTYPE["FIRMWARE"]:
                 print(str(CMDTYPE["FIRMWARE"])+" FIRMWARE command received...")
                 print(msg)
-                if self._listner_ota_callback:
-                    self._listner_ota_callback(msg)
+                if self._listener_ota_callback:
+                    self._listener_ota_callback(msg)
             elif msg["ct"] == CMDTYPE["MODULE"]:
                 print(str(CMDTYPE["MODULE"])+" MODULE command received...")
                 print(msg)
-                if self._listner_module_callback:
-                    self._listner_module_callback(msg)
+                if self._listener_module_callback:
+                    self._listener_module_callback(msg)
             elif msg["ct"] == CMDTYPE["U_barred"] or msg["ct"] == CMDTYPE["D_Disabled"] or msg["ct"] == CMDTYPE["D_Released"] or msg["ct"] == CMDTYPE["STOP"]:
                 if msg["ct"] == CMDTYPE["U_barred"]:
                     print(str(CMDTYPE["U_barred"])+" U_barred command received...")
@@ -486,15 +486,15 @@ class IoTConnectSDK:
                 msg["uniqueId"] = self._uniqueId
             else:
                 msg["uniqueId"] = self._uniqueId
-            if self._listner_twin_callback != None:
-                self._listner_twin_callback(msg)
+            if self._listener_twin_callback != None:
+                self._listener_twin_callback(msg)
         except Exception as ex:
             print("Message process failed...",ex)
 
     def onDirectMethodMessage(self,msg,methodname,requestId):
         try:
-            if self._listner_direct_callback_list :
-                self._listner_direct_callback_list[str(methodname)](msg,methodname,requestId)
+            if self._listener_direct_callback_list :
+                self._listener_direct_callback_list[str(methodname)](msg,methodname,requestId)
         except Exception as ex:
             print(ex)
 
@@ -1025,8 +1025,8 @@ class IoTConnectSDK:
                     if (rule['con'].find(str(d["tg"])) > -1) and (d["id"] in self._live_device):
                         template["id"] = d["id"]
                         template["command"] = command_text
-                        if self._listner_device_callback != None:
-                            self._listner_device_callback(template)
+                        if self._listener_device_callback != None:
+                            self._listener_device_callback(template)
         except Exception as ex:
             print(ex)
 
@@ -1064,7 +1064,7 @@ class IoTConnectSDK:
                 raise(IoTConnectSDKException("00", "delete child Device not posibale. it is not gatway device. "))
             for device in self._data_json['d']:
                 if child_id == device["id"]:
-                    self._listner_deletechild_callback=callback
+                    self._listener_deletechild_callback=callback
                     self.deletechild=child_id
                     template={
                         "mt": 222,
@@ -1112,7 +1112,7 @@ class IoTConnectSDK:
             template["id"]=deviceId
             template["tg"]=deviceTag
             if callback:
-                self._listner_creatchild_callback=callback
+                self._listener_creatchild_callback=callback
         except:
             self.write_debuglog('[ERR_GD01] '+ self._time +'['+ str(self._sId)+'_'+ str(self._uniqueId) + "] Create child Device Error",1)
             raise(IoTConnectSDKException("04", "createChildDevice"))
@@ -1382,7 +1382,7 @@ class IoTConnectSDK:
             self._property = sdkOptions
 
         if initCallback:
-            self._listner_callback=initCallback
+            self._listener_callback=initCallback
 
         self.get_config()
         if self._debug:
