@@ -12,72 +12,91 @@
  * Import the IoTConnect SDK package and other required packages
 """
 
+# OTA this sample can perform OTA updates, requirements of the OTA payload
+# OTA payload must be a single file of file extension .tar.gz
+# OTA update version of the main .py file must be called the same as a previous version otherwise it will not load
+
+app_version: str = "1.0"
+
 import sys
 import json
 import time
 import threading
 import random
-from iotconnect import IoTConnectSDK
+
+# if iotconnect module is not installed then use the local one
+# note: this is if you are running the sample in the git repository folder
+try:
+    from iotconnect import IoTConnectSDK
+except:
+    sys.path.append("iotconnect-sdk-1.0")
+    from iotconnect import IoTConnectSDK
+
 from datetime import datetime
 import os
 
-"""
-* ## Prerequisite parameter to run this sampel code
-* cpId         :: It need to get from the IoTConnect platform "Settings->Key Vault". 
-* uniqueId     :: Its device ID which register on IotConnect platform and also its status has Active and Acquired
-* env          :: It need to get from the IoTConnect platform "Settings->Key Vault". 
-* interval     :: send data frequency in seconds
-* sdkOptions   :: It helps to define the path of self signed and CA signed certificate as well as define the offlinne storage configuration.
-"""
+import tarfile
+import shutil
+from urllib.request import urlretrieve 
 
 
-UniqueId = "<<Your Device UniqueID>>" 
-SId = "<<Your Company SID>>"
+import credentials
+UniqueId: str = credentials.UniqueId 
+sdk_identity: str = credentials.sdk_identity
+SdkOptions: dict = credentials.SdkOptions
+
+app_paths: dict = {
+    "app_name": None,
+    "primary_app_dir": None,
+    "secondary_app_dir": None,
+    "tarball_download_dir": None,
+    "tarball_extract_dir": None,
+    "module_name": None,
+    "main_dir": None
+}
+
+ota_finished_need_exit: bool = False
+
+def ota_extract_to_a_and_move_old_a_to_b(tarball_name:str):
+    # extract tarball to new directory
+    file = tarfile.open(app_paths["main_dir"] + app_paths["tarball_download_dir"] + tarball_name)
+    file.extractall(app_paths["main_dir"] + app_paths["tarball_extract_dir"])
+    file.close()
+
+    # rm secondary dir
+    path = app_paths["main_dir"] + app_paths["secondary_app_dir"]
+    shutil.rmtree(path, ignore_errors=True)
+
+    # move primary to secondary
+    os.rename(app_paths["main_dir"] + app_paths["primary_app_dir"], app_paths["main_dir"] + app_paths["secondary_app_dir"])
+
+    # copy extracted dir to primary dir
+    src = app_paths["main_dir"] + app_paths["tarball_extract_dir"]
+    dst = app_paths["main_dir"] + app_paths["primary_app_dir"]
+    shutil.copytree(src, dst)
+
+    # delete temp folders
+    shutil.rmtree(app_paths["main_dir"] + app_paths["tarball_download_dir"], ignore_errors=True)
+    shutil.rmtree(app_paths["main_dir"] + app_paths["tarball_extract_dir"], ignore_errors=True)
+
+def ota_backup_primary():
+    src = app_paths["main_dir"] + app_paths["primary_app_dir"]
+    dst = app_paths["main_dir"] + app_paths["primary_app_backup_folder_name"]
+    shutil.copytree(src, dst)
+
+def ota_restore_primary():
+    shutil.rmtree(app_paths["main_dir"] + app_paths["primary_app_dir"], ignore_errors=True)
+    os.rename(app_paths["main_dir"] + app_paths["primary_app_backup_folder_name"], app_paths["main_dir"] + app_paths["primary_app_dir"])
+
+def ota_delete_primary_backup():
+    shutil.rmtree(app_paths["main_dir"] + app_paths["primary_app_backup_folder_name"], ignore_errors=True)
 
 Sdk=None
 interval = 30
 directmethodlist={}
 ACKdirect=[]
 device_list=[]
-"""
-* sdkOptions is optional. Mandatory for "certificate" X.509 device authentication type
-* "certificate" : It indicated to define the path of the certificate file. Mandatory for X.509/SSL device CA signed or self-signed authentication type only.
-* 	- SSLKeyPath: your device key
-* 	- SSLCertPath: your device certificate
-* 	- SSLCaPath : Root CA certificate
-* 	- Windows + Linux OS: Use "/" forward slash (Example: Windows: "E:/folder1/folder2/certificate", Linux: "/home/folder1/folder2/certificate")
-* "offlineStorage" : Define the configuration related to the offline data storage 
-* 	- disabled : false = offline data storing, true = not storing offline data 
-* 	- availSpaceInMb : Define the file size of offline data which should be in (MB)
-* 	- fileCount : Number of files need to create for offline data
-* "devicePrimaryKey" : It is optional parameter. Mandatory for the Symmetric Key Authentication support only. It gets from the IoTConnect UI portal "Device -> Select device -> info(Tab) -> Connection Info -> Device Connection".
-    - - "devicePrimaryKey": "<<your Key>>"
-* Note: sdkOptions is optional but mandatory for SSL/x509 device authentication type only. Define proper setting or leave it NULL. If you not provide the offline storage it will set the default settings as per defined above. It may harm your device by storing the large data. Once memory get full may chance to stop the execution.
-"""
 
-
-SdkOptions={
-	"certificate" : { 
-		"SSLKeyPath"  : "",    #aws=pk_devicename.pem   ||   #az=device.key
-		"SSLCertPath" : "",    #aws=cert_devicename.crt ||   #az=device.pem
-		"SSLCaPath"   : ""     #aws=root-CA.pem         ||   #az=rootCA.pem 
-        
-	},
-    "offlineStorage":{
-        "disabled": False,
-	    "availSpaceInMb": 0.01,
-	    "fileCount": 5,
-        "keepalive":60
-    },
-    "skipValidation":False,
-    # "devicePrimaryKey":"<<DevicePrimaryKey>>",
-	# As per your Environment(Azure or Azure EU or AWS) uncomment single URL and commnet("#") rest of URLs.
-    # "discoveryUrl":"https://eudiscovery.iotconnect.io" #Azure EU environment 
-    # "discoveryUrl":"https://discovery.iotconnect.io", #Azure All Environment 
-    "discoveryUrl":"http://52.204.155.38:219", #AWS pre-QA Environment
-    "IsDebug": False
-   
-}
 
 
 """
@@ -111,16 +130,16 @@ def DeviceCallback(msg):
             #print(data)
             if "id" in data:
                 if "ack" in data and data["ack"]:
-                    Sdk.sendAckCmd(data["ack"],7,"sucessfull",data["id"])  #fail=4,executed= 5,sucess=7,6=executedack
+                    Sdk.sendAckCmd(data["ack"],7,"successful",data["id"])  #fail=4,executed= 5,success=7,6=executed ack
             else:
                 if "ack" in data and data["ack"]:
-                    Sdk.sendAckCmd(data["ack"],7,"sucessfull") #fail=4,executed= 5,sucess=7,6=executedack
+                    Sdk.sendAckCmd(data["ack"],7,"successful") #fail=4,executed= 5,success=7,6=executed ack
     else:
         print("rule command",msg)
 
     # Firmware Upgrade
 def DeviceFirmwareCallback(msg):
-    global Sdk,device_list
+    global Sdk,device_list, ota_finished_need_exit
     print("\n--- firmware Command Message Received ---")
     print(json.dumps(msg))
     cmdType = None
@@ -137,18 +156,59 @@ def DeviceFirmwareCallback(msg):
         * - Message Type
         *     msgType = 11; // for "0x02" Firmware command
         """
-        data = msg
-        if data != None:
-            if ("urls" in data) and data["urls"]:
-                for url_list in data["urls"]:
-                    if "tg" in url_list:
-                        for i in device_list:
-                            if "tg" in i and (i["tg"] == url_list["tg"]):
-                                Sdk.sendOTAAckCmd(data["ack"],0,"sucessfull",i["id"]) #Success=0, Failed = 1, Executed/DownloadingInProgress=2, Executed/DownloadDone=3, Failed/DownloadFailed=4
-                    else:
-                        Sdk.sendOTAAckCmd(data["ack"],0,"sucessfull") #Success=0, Failed = 1, Executed/DownloadingInProgress=2, Executed/DownloadDone=3, Failed/DownloadFailed=4
+        # data = msg
+        # if data != None:
+        #     if ("urls" in data) and data["urls"]:
+        #         for url_list in data["urls"]:
+        #             if "tg" in url_list:
+        #                 for i in device_list:
+        #                     if "tg" in i and (i["tg"] == url_list["tg"]):
+        #                         Sdk.sendOTAAckCmd(data["ack"],0,"successful",i["id"]) #Success=0, Failed = 1, Executed/DownloadingInProgress=2, Executed/DownloadDone=3, Failed/DownloadFailed=4
+        #             else:
+        #                 Sdk.sendOTAAckCmd(data["ack"],0,"successful") #Success=0, Failed = 1, Executed/DownloadingInProgress=2, Executed/DownloadDone=3, Failed/DownloadFailed=4
 
-def DeviceConectionCallback(msg):  
+        payload_valid: bool = False
+        data = msg
+
+        if data != None:
+            if ("urls" in data) and len(data["urls"]) == 1:                
+                if ("url" in data["urls"][0]) and ("fileName" in data["urls"][0]):
+                    if (data["urls"][0]["fileName"].endswith(".gz")):
+                        payload_valid = True   
+
+            if payload_valid is True:
+                urls = data["urls"][0]
+                Sdk.sendOTAAckCmd(data["ack"],2,"downloading payload")
+                
+                # download tarball from url to download_dir
+                url: str = urls["url"]
+                download_filename: str = urls["fileName"]
+                final_folder_dest:str = app_paths["main_dir"] + app_paths["tarball_download_dir"]
+                if os.path.exists(final_folder_dest) == False:
+                    os.mkdir(final_folder_dest)
+                urlretrieve(url, final_folder_dest + download_filename)
+
+                Sdk.sendOTAAckCmd(data["ack"],3,"payload downloaded")
+                
+                ota_finished_need_exit = False
+                ota_backup_primary()
+                try:
+                    ota_extract_to_a_and_move_old_a_to_b(download_filename)
+                    ota_finished_need_exit = True
+                except:
+                    ota_restore_primary()
+                    Sdk.sendOTAAckCmd(data["ack"],4,"OTA FAILED")
+                    ota_finished_need_exit = False
+
+                if ota_finished_need_exit:
+                    ota_delete_primary_backup()
+                    Sdk.sendOTAAckCmd(data["ack"],0,"OTA complete, restarting")
+                    return
+        
+    Sdk.sendOTAAckCmd(data["ack"],4,"OTA FAILED, invalid payload")
+
+
+def DeviceConnectionCallback(msg):  
     cmdType = None
     if msg != None and len(msg.items()) != 0:
         cmdType = msg["ct"] if msg["ct"] != None else None
@@ -163,7 +223,7 @@ def DeviceConectionCallback(msg):
  * Input   : Desired property "key" and Desired property "value"
  * Output  : 
 """
-# key = "<< Desired property key >>"; // Desired proeprty key received from Twin callback message
+# key = "<< Desired property key >>"; // Desired property key received from Twin callback message
 # value = "<< Desired Property value >>"; // Value of respective desired property
 # Sdk.UpdateTwin(key,value)
 
@@ -198,7 +258,7 @@ def DirectMethodCallback1(msg,methodname,rId):
     print(msg)
     print(methodname)
     print(rId)
-    data={"data":"succed"}
+    data={"data":"succeeded"}
     #return data,200,rId
     ACKdirect.append({"data":data,"status":200,"reqId":rId})
     #Sdk.DirectMethodACK(data,200,rId)
@@ -229,9 +289,15 @@ def attributeDetails(data):
 
 
 
-def main():
-    global SId,SdkOptions,Sdk,ACKdirect,device_list
-    
+def main(app_paths_in:dict):
+    global sdk_identity,SdkOptions,Sdk,ACKdirect,device_list
+
+    global app_paths 
+    app_paths = app_paths_in
+
+    global ota_finished_need_exit
+
+    print("basic sample version " + app_version)
     try:
         """
         if SdkOptions["certificate"]:
@@ -246,11 +312,11 @@ def main():
         """    
         """
         * Type    : Object Initialization "IoTConnectSDK()"
-        * Usage   : To Initialize SDK and Device cinnection
+        * Usage   : To Initialize SDK and Device connection
         * Input   : cpId, uniqueId, sdkOptions, env as explained above and DeviceCallback and TwinUpdateCallback is callback functions
         * Output  : Callback methods for device command and twin properties
         """
-        with IoTConnectSDK(UniqueId,SId,SdkOptions,DeviceConectionCallback) as Sdk:
+        with IoTConnectSDK(UniqueId,sdk_identity,SdkOptions,DeviceConnectionCallback) as Sdk:
             try:
                 """
                 * Type    : Public Method "GetAllTwins()"
@@ -264,12 +330,16 @@ def main():
                 Sdk.onDeviceChangeCommand(DeviceChangCallback)
                 Sdk.getTwins()
                 device_list=Sdk.Getdevice()
-                #Sdk.delete_chield("childid",delete_child_callback)
+                #Sdk.delete_child("childid",delete_child_callback)
 
                 #Sdk.UpdateTwin("ss01","mmm")
                 #sdk.GetAllTwins()
                 # Sdk.GetAttributes(attributeDetails)
                 while True:
+
+                    if ota_finished_need_exit == True:
+                        print("OTA is complete, exiting")
+                        break
                     #Sdk.GetAttributes()
                     """
                     * Non Gateway device input data format Example:
@@ -278,6 +348,7 @@ def main():
 
                     
                     data = {
+                    "sw_version": app_version,
                     "temperature":random.randint(30, 50),
                     "long1":random.randint(6000, 9000),
                     "integer1": random.randint(100, 200),
@@ -402,4 +473,4 @@ def main():
         sys.exit(0)
 
 if __name__ == "__main__":
-    main()
+    print("execute from main.py")
