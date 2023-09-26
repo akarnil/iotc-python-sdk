@@ -132,6 +132,7 @@ class IoTConnectSDK:
     _listner_deletechild_callback = None
     _validation = True
     _getattribute_callback = None
+    _needs_exit: bool = False
 
     def get_config(self):
         try:
